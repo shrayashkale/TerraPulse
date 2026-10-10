@@ -112,6 +112,16 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
         credit: new C.Credit('Esri, Maxar, Earthstar Geographics'),
       }),
     );
+    // Seamless ambient labels (cities → streets as you zoom), transparent,
+    // OSM-based — this is what makes it feel like Google Earth.
+    viewer.imageryLayers.addImageryProvider(
+      new C.UrlTemplateImageryProvider({
+        url: 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
+        subdomains: ['a', 'b', 'c', 'd'],
+        maximumLevel: 20,
+        credit: new C.Credit('© OpenStreetMap contributors © CARTO'),
+      }),
+    );
 
     // apply any label that arrived before the viewer was ready
     if (pendingLabel.current) applyLabel(C, viewer, labelRef, pendingLabel.current);
