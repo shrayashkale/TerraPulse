@@ -56,8 +56,8 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
     (viewer.scene as any).globe.baseColor = C.Color.fromCssColorString('#060b16');
 
     // NASA GIBS: VIIRS true-color day imagery (HD, deep zoom, no key).
-    // Verified against the live GetCapabilities: TileMatrixSet "250m",
-    // matrices 0-8, PNG. (Wrong IDs/formats = blank blue globe.)
+    // Verified vs live GetCapabilities + real tile downloads:
+    // base = 250m set, matrices 0-8, JPEG; overlays = 250m, PNG.
     const gibs = (layer: string, format: string) =>
       new C.WebMapTileServiceImageryProvider({
         url: GIBS, layer, style: 'default', format,
@@ -65,7 +65,7 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
         credit: new C.Credit('NASA GIBS'),
       });
     viewer.imageryLayers.addImageryProvider(
-      gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/png'),
+      gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/jpeg'),
     );
     // Borders + place labels overlay (transparent)
     for (const layer of ['Reference_Features', 'Reference_Labels']) {
