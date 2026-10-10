@@ -14,7 +14,7 @@ interface Props {
   onFocusChange: (lat: number, lon: number, height: number) => void;
 }
 
-const GIBS = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi';
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
 // (re)draw the pinned place-name label entity
 function applyLabel(C: any, v: any, labelRef: { current: any }, p: { text: string; lat: number; lon: number }) {
@@ -103,24 +103,15 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
     viewer.scene.skyAtmosphere.show = true;
     (viewer.scene as any).globe.baseColor = C.Color.fromCssColorString('#060b16');
 
-    // NASA GIBS via Web-Mercator (GoogleMapsCompatible grid), which matches
-    // Cesium's WebMercatorTilingScheme exactly. (The 4326 "250m" set has a
-    // non-doubling grid Cesium can't align — that was the dark band.)
-    // Verified vs live GetCapabilities + real tile downloads.
-    const scheme = new C.WebMercatorTilingScheme();
-    const gibs = (layer: string, format: string) =>
-      new C.WebMapTileServiceImageryProvider({
-        url: GIBS, layer, style: 'default', format,
-        tileMatrixSetID: 'GoogleMapsCompatible_Level9', maximumLevel: 9,
-        tilingScheme: scheme,
-        credit: new C.Credit('NASA GIBS'),
-      });
+    // Esri World Imagery: sharp HD satellite down to street level (z0-19),
+    // no key needed. This is the Google-Earth-like base.
     viewer.imageryLayers.addImageryProvider(
-      gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/jpeg'),
+      new C.UrlTemplateImageryProvider({
+        url: ESRI,
+        maximumLevel: 19,
+        credit: new C.Credit('Esri, Maxar, Earthstar Geographics'),
+      }),
     );
-    // NOTE: GIBS Reference_Features/Reference_Labels tiles are blank on the
-    // 3857 endpoint (verified) — place names are rendered as a Cesium entity
-    // label via setLabel() instead. Sharper and always in sync.
 
     // apply any label that arrived before the viewer was ready
     if (pendingLabel.current) applyLabel(C, viewer, labelRef, pendingLabel.current);

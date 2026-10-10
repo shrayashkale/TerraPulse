@@ -30,6 +30,9 @@ export default function App() {
   const [searching, setSearching] = useState(false);
   const [resume, setResume] = useState<Resume | null>(() => store.getResume());
   const [uploading, setUploading] = useState(false);
+  // name pinned from a search — beats a flaky reverse-geocode until a
+  // confident one arrives
+  const [labelOverride, setLabelOverride] = useState<string | null>(null);
 
   const lastKey = useRef('');
   const lastCoords = useRef<{ lat: number; lon: number } | null>(null);
@@ -62,6 +65,12 @@ export default function App() {
 
       setPlace(p);
       setGranularity(g);
+      // a confident geocode clears any search-pinned label
+      const confident =
+        g === 'country' ? !!p.country
+        : g === 'state' ? !!(p.state || p.country)
+        : !!(p.city || p.locality);
+      if (confident) setLabelOverride(null);
       const local = g === 'city' || g === 'locality';
 
       setLoading({ news: true, jobs: local, hotels: local });
@@ -114,7 +123,13 @@ export default function App() {
     setSearching(true);
     try {
       const hit = await geocodeSearch(search.trim());
-      if (hit) globeRef.current?.flyTo(hit.lat, hit.lon, 700_000);
+      if (hit) {
+        // pin the searched name immediately — "Mumbai, Maharashtra, India"
+        const short = hit.label.split(',').slice(0, 3).map((s) => s.trim()).join(' · ');
+        setLabelOverride(short);
+        globeRef.current?.flyTo(hit.lat, hit.lon, 700_000);
+        globeRef.current?.setLabel(short, hit.lat, hit.lon);
+      }
     } finally {
       setSearching(false);
     }
@@ -172,11 +187,15 @@ export default function App() {
   }, []);
 
   // pin the place name on the globe itself
-  const label = place ? placeLabel(place, granularity) : 'Earth';
+  const label = labelOverride ?? (place ? placeLabel(place, granularity) : 'Earth');
   useEffect(() => {
-    if (place) globeRef.current?.setLabel(label, place.lat, place.lon);
-    else globeRef.current?.setLabel(null);
-  }, [label, place]);
+    if (place || labelOverride) {
+      const p = place ?? { lat: 20, lon: 20 };
+      globeRef.current?.setLabel(label, p.lat, p.lon);
+    } else {
+      globeRef.current?.setLabel(null);
+    }
+  }, [label, labelOverride, place]);
 
   if (!keys) {
     return <KeyGate onDone={() => setKeys(store.getKeys())} />;
