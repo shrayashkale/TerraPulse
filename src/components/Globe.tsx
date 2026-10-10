@@ -8,6 +8,7 @@ declare global {
 export interface GlobeHandle {
   flyTo: (lat: number, lon: number, height?: number) => void;
   setLabel: (text: string | null, lat?: number, lon?: number) => void;
+  dropPin: (lat: number, lon: number, text: string) => void;
 }
 
 interface Props {
@@ -15,6 +16,30 @@ interface Props {
 }
 
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+// draw a map-pin icon on a canvas → data URL for the billboard
+function makePin(C: any, color: string): string {
+  const c = document.createElement('canvas');
+  c.width = 68; c.height = 88;
+  const x = c.getContext('2d')!;
+  x.fillStyle = color;
+  x.strokeStyle = '#060b16';
+  x.lineWidth = 4;
+  // pointer first (circle covers its top edge)
+  x.beginPath();
+  x.moveTo(16, 46); x.lineTo(52, 46); x.lineTo(34, 82); x.closePath();
+  x.fill(); x.stroke();
+  // head
+  x.beginPath();
+  x.arc(34, 30, 24, 0, Math.PI * 2);
+  x.fill(); x.stroke();
+  // hole
+  x.fillStyle = '#060b16';
+  x.beginPath();
+  x.arc(34, 30, 10, 0, Math.PI * 2);
+  x.fill();
+  return c.toDataURL();
+}
 
 // (re)draw the pinned place-name label entity
 function applyLabel(C: any, v: any, labelRef: { current: any }, p: { text: string; lat: number; lon: number }) {
@@ -52,6 +77,7 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
   const divRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const labelRef = useRef<any>(null);
+  const pinRef = useRef<any>(null);
   const pendingLabel = useRef<{ text: string; lat: number; lon: number } | null>(null);
   const cbRef = useRef(onFocusChange);
   cbRef.current = onFocusChange;
@@ -81,6 +107,31 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
       pendingLabel.current = { text, lat, lon };
       if (!C || !v) return;
       applyLabel(C, v, labelRef, pendingLabel.current);
+    },
+    dropPin(lat: number, lon: number, text: string) {
+      const C = window.Cesium;
+      const v = viewerRef.current;
+      if (!C || !v) return;
+      if (pinRef.current) { v.entities.remove(pinRef.current); pinRef.current = null; }
+      pinRef.current = v.entities.add({
+        position: C.Cartesian3.fromDegrees(lon, lat, 800),
+        billboard: {
+          image: makePin(C, '#f59e0b'),
+          width: 34, height: 44,
+          verticalOrigin: C.VerticalOrigin.BOTTOM,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text,
+          font: '700 13px system-ui, sans-serif',
+          fillColor: C.Color.WHITE,
+          outlineColor: C.Color.fromCssColorString('#060b16'),
+          outlineWidth: 4,
+          style: C.LabelStyle.FILL_AND_OUTLINE,
+          pixelOffset: new C.Cartesian2(0, -52),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+      });
     },
   }));
 

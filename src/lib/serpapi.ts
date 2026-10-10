@@ -8,6 +8,38 @@ async function callSerpApi(apiKey: string, params: Record<string, string>) {
   return r.json();
 }
 
+// ─── Google Maps place resolve: "Company, City" → coordinates ─────────
+export interface PlaceCoords {
+  lat: number;
+  lon: number;
+  address: string;
+  name: string;
+}
+
+export async function fetchPlaceCoords(
+  key: string, company: string, location: string,
+): Promise<PlaceCoords | null> {
+  try {
+    const d = await callSerpApi(key, {
+      engine: 'google_maps',
+      q: `${company}, ${location}`,
+      type: 'search',
+    });
+    const lr = d.local_results;
+    const places: any[] = Array.isArray(lr) ? lr : lr?.places ?? [];
+    const hit = places.find((p) => p?.gps_coordinates?.latitude !== undefined);
+    if (!hit) return null;
+    return {
+      lat: hit.gps_coordinates.latitude,
+      lon: hit.gps_coordinates.longitude,
+      address: hit.address ?? location,
+      name: hit.title ?? company,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchNews(apiKey: string, query: string, countryCode?: string, topic?: string): Promise<NewsItem[]> {
   const q = topic ? `${topic} ${query}`.trim() : query;
   const d = await callSerpApi(apiKey, {

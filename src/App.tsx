@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ApiKeys, Place, Granularity, NewsItem, JobItem, HotelItem, Resume, ScoredJob } from './types';
 import { store } from './lib/storage';
 import { reverseGeocode, granularityForHeight, placeLabel, queryFor, geocodeSearch } from './lib/geo';
-import { fetchNews, fetchJobs, fetchHotels } from './lib/serpapi';
+import { fetchNews, fetchJobs, fetchHotels, fetchPlaceCoords } from './lib/serpapi';
 import { briefPlace, askAboutPlace } from './lib/gemini';
 import { extractTextFromFile, parseResumeText } from './lib/resume';
 import { scoreJob } from './lib/matcher';
@@ -30,6 +30,7 @@ export default function App() {
   const [searching, setSearching] = useState(false);
   const [resume, setResume] = useState<Resume | null>(() => store.getResume());
   const [uploading, setUploading] = useState(false);
+  const [locating, setLocating] = useState<number | null>(null);
   // name pinned from a search — beats a flaky reverse-geocode until a
   // confident one arrives
   const [labelOverride, setLabelOverride] = useState<string | null>(null);
@@ -182,6 +183,23 @@ export default function App() {
     setResume(null);
   };
 
+  // "show on map": resolve the company office via Google Maps, fly + pin it
+  const locateJob = async (job: ScoredJob, index: number) => {
+    const k = keysRef.current;
+    if (!k || locating !== null) return;
+    setLocating(index);
+    try {
+      const area = job.location || (place ? placeLabel(place, granularity) : '');
+      const hit = await fetchPlaceCoords(k.serpapi, job.company, area);
+      if (hit) {
+        globeRef.current?.dropPin(hit.lat, hit.lon, `${hit.name}`);
+        globeRef.current?.flyTo(hit.lat, hit.lon, 120_000);
+      }
+    } finally {
+      setLocating(null);
+    }
+  };
+
   useEffect(() => {
     document.title = 'TerraPulse — what\'s happening anywhere on Earth, live';
   }, []);
@@ -253,6 +271,7 @@ export default function App() {
           onSearch={refetchWithFilters}
           resume={resume} uploading={uploading}
           onResumeUpload={uploadResume} onResumeClear={clearResume}
+          locating={locating} onLocateJob={locateJob}
         />
       </div>
 
@@ -266,6 +285,7 @@ export default function App() {
           onSearch={refetchWithFilters}
           resume={resume} uploading={uploading}
           onResumeUpload={uploadResume} onResumeClear={clearResume}
+          locating={locating} onLocateJob={locateJob}
         />
       </div>
 

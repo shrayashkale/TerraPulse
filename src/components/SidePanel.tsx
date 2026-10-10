@@ -15,6 +15,8 @@ interface Props {
   uploading: boolean;
   onResumeUpload: (f: File) => void;
   onResumeClear: () => void;
+  locating: number | null;
+  onLocateJob: (job: ScoredJob, index: number) => void;
 }
 
 function FilterBar({ value, onChange, onSearch, placeholder }: {
@@ -149,6 +151,16 @@ export default function SidePanel(p: Props) {
                        className="inline-block mt-2 text-[11px] font-bold text-cyan-300 hover:text-cyan-200">
                       Apply ↗
                     </a>
+                  )}
+                  {!/remote/i.test(j.location ?? '') && (
+                    <button
+                      onClick={() => p.onLocateJob(j, i)}
+                      disabled={p.locating !== null}
+                      className="inline-block mt-2 ml-3 text-[11px] font-bold text-amber-300 hover:text-amber-200 disabled:opacity-50"
+                      title="Fly the globe to this company's office"
+                    >
+                      {p.locating === i ? 'Locating…' : '📍 Show on map'}
+                    </button>
                   )}
                 </div>
               ))}
