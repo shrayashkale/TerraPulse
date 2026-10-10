@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ApiKeys, Place, Granularity, NewsItem, JobItem, HotelItem, Resume, ScoredJob } from './types';
 import { store } from './lib/storage';
-import { reverseGeocode, granularityForHeight, placeLabel, queryFor, geocodeSearch } from './lib/geo';
+import { reverseGeocode, granularityForHeight, placeLabel, queryFor, geocodeSearch, heightForSpan } from './lib/geo';
 import { fetchNews, fetchJobs, fetchHotels, fetchPlaceCoords } from './lib/serpapi';
 import { briefPlace, askAboutPlace } from './lib/gemini';
 import { extractTextFromFile, parseResumeText } from './lib/resume';
@@ -128,7 +128,8 @@ export default function App() {
         // pin the searched name immediately — "Mumbai, Maharashtra, India"
         const short = hit.label.split(',').slice(0, 3).map((s) => s.trim()).join(' · ');
         setLabelOverride(short);
-        globeRef.current?.flyTo(hit.lat, hit.lon, 700_000);
+        // altitude from the place's real span: country/state/city/neighbourhood
+        globeRef.current?.flyTo(hit.lat, hit.lon, heightForSpan(hit.span));
         globeRef.current?.setLabel(short, hit.lat, hit.lon);
       }
     } finally {

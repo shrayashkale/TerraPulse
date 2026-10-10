@@ -54,12 +54,33 @@ export function queryFor(p: Place, g: Granularity): string {
   }
 }
 
+/**
+ * Pick a fly-to altitude from the place's real-world span so the news depth
+ * matches what was searched: "india" → country view, "mumbai" → city view,
+ * "andheri" → neighbourhood view. (Fixed heights always landed on 'city'.)
+ */
+export function heightForSpan(spanDeg: number): number {
+  if (spanDeg > 12) return 5_000_000; // country
+  if (spanDeg > 3) return 2_000_000; // state
+  if (spanDeg > 0.15) return 700_000; // city
+  return 250_000; // neighbourhood / street
+}
+
 /** Fly-to search: Nominatim, no key, CORS-friendly. */
-export async function geocodeSearch(q: string): Promise<{ lat: number; lon: number; label: string } | null> {
+export async function geocodeSearch(q: string): Promise<{ lat: number; lon: number; label: string; span: number } | null> {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`;
   const r = await fetch(url, { headers: { Accept: 'application/json' } });
   if (!r.ok) return null;
   const d = await r.json();
   if (!d?.length) return null;
-  return { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon), label: d[0].display_name.split(',').slice(0, 3).join(',') };
+  const bb: string[] = d[0].boundingbox ?? [];
+  const span = bb.length === 4
+    ? Math.max(parseFloat(bb[1]) - parseFloat(bb[0]), parseFloat(bb[3]) - parseFloat(bb[2]))
+    : 1;
+  return {
+    lat: parseFloat(d[0].lat),
+    lon: parseFloat(d[0].lon),
+    label: d[0].display_name.split(',').slice(0, 3).join(','),
+    span: Number.isFinite(span) && span > 0 ? span : 1,
+  };
 }
