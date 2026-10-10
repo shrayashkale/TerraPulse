@@ -45,3 +45,22 @@ export interface HotelItem {
   thumbnail?: string;
   amenities?: string[];
 }
+
+export interface Resume {
+  id: string;
+  filename: string;
+  uploadedAt: number;
+  name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+  title?: string;
+  skills: string[];
+  yearsTotal?: number;
+}
+
+export interface ScoredJob extends JobItem {
+  matchScore: number;
+  matchedSkills: string[];
+  missingSkills: string[];
+}

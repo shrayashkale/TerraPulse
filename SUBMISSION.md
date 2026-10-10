@@ -6,18 +6,22 @@ Deadline: **2026-10-10 23:59 IST**
 ## Project description (paste-ready draft)
 
 > **TerraPulse** is a live interactive 3D Earth globe that answers one question for any spot on the
-> planet: *what's happening here, right now?* Zoom into India and get India's breaking news; zoom into
-> Mumbai and the pulse goes local — headlines, live job listings, hotels with real weekend prices; zoom
-> into Andheri and it follows you down to the neighbourhood. Every zoom level fires **SerpApi's Google
-> News, Google Jobs, and Google Hotels engines** off the exact coordinates in view, and a **Gemini AI
-> briefing** synthesizes the headlines into a three-sentence brief — plus you can ask follow-up questions
-> about any place, answered from live data. Filters let you slice news by topic and jobs by role.
+> planet: *what's happening here, right now?* — and, for jobseekers, the sharper question: ***where is
+> the work?*** Zoom into India and get India's breaking news; zoom into Mumbai and the pulse goes local —
+> headlines, hotels with real weekend prices, and **job listings ranked by fit against your own resume**
+> (upload it once in the Jobs tab — PDF/DOCX/TXT parsed in-browser, every listing scored on skills with
+> match % and skill gaps). Zoom into Andheri and the pulse follows you to the neighbourhood. Every zoom
+> level fires **SerpApi's Google News, Google Jobs, and Google Hotels engines** off the exact coordinates
+> in view, and a **Gemini AI briefing** synthesizes the headlines into a three-sentence brief — plus you
+> can ask follow-up questions about any place, answered from live data. Filters slice news by topic and
+> jobs by role.
 >
-> Who it helps: travellers scouting a city, jobseekers reading a local market, and the simply curious —
-> anyone who ever zoomed into Google Earth and wished it knew what was going on down there.
+> Who it helps: jobseekers who don't know *where* the opportunities are — which cities are hiring for
+> *their* skills — plus travellers scouting a city and the simply curious. Nobody shows you the job market
+> as a place you can explore.
 >
 > How it uses SerpApi: Google News is the heartbeat (hierarchical breaking news by zoom depth); Google
-> Jobs powers the local work market with role filters; Google Hotels brings live weekend pricing. Without
+> Jobs powers the resume-matched local work market; Google Hotels brings live weekend pricing. Without
 > live search data the globe is just a picture — SerpApi does real work on every single zoom.
 
 ~175 words — trim to fit the form's character limit if needed.

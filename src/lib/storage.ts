@@ -1,7 +1,8 @@
-// ─── TerraPulse local storage: API keys only ───────────────────────────
-import type { ApiKeys } from '../types';
+// ─── TerraPulse local storage: API keys + resume ────────────────────────
+import type { ApiKeys, Resume } from '../types';
 
 const KEYS = 'terrapulse.keys.v1';
+const RESUME = 'terrapulse.resume.v1';
 
 export const store = {
   getKeys(): ApiKeys | null {
@@ -19,5 +20,17 @@ export const store = {
   },
   clearKeys() {
     localStorage.removeItem(KEYS);
+  },
+  getResume(): Resume | null {
+    try {
+      const raw = localStorage.getItem(RESUME);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  },
+  setResume(r: Resume | null) {
+    if (r) localStorage.setItem(RESUME, JSON.stringify(r));
+    else localStorage.removeItem(RESUME);
   },
 };

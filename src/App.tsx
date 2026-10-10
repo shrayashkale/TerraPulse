@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ApiKeys, Place, Granularity, NewsItem, JobItem, HotelItem } from './types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ApiKeys, Place, Granularity, NewsItem, JobItem, HotelItem, Resume, ScoredJob } from './types';
 import { store } from './lib/storage';
 import { reverseGeocode, granularityForHeight, placeLabel, queryFor, geocodeSearch } from './lib/geo';
 import { fetchNews, fetchJobs, fetchHotels } from './lib/serpapi';
 import { briefPlace, askAboutPlace } from './lib/gemini';
+import { extractTextFromFile, parseResumeText } from './lib/resume';
+import { scoreJob } from './lib/matcher';
 import KeyGate from './components/KeyGate';
 import Globe, { type GlobeHandle } from './components/Globe';
 import SidePanel from './components/SidePanel';
@@ -26,8 +28,11 @@ export default function App() {
   const [briefingLoading, setBriefingLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [searching, setSearching] = useState(false);
+  const [resume, setResume] = useState<Resume | null>(() => store.getResume());
+  const [uploading, setUploading] = useState(false);
 
   const lastKey = useRef('');
+  const lastCoords = useRef<{ lat: number; lon: number } | null>(null);
   const keysRef = useRef(keys);
   keysRef.current = keys;
   const topicRef = useRef(newsTopic);
@@ -38,6 +43,14 @@ export default function App() {
   const loadFor = useCallback(async (lat: number, lon: number, height: number, force = false) => {
     const k = keysRef.current;
     if (!k) return;
+    // ignore micro-pans (< ~8km): same place, don't burn geocode + SerpApi calls
+    const prev = lastCoords.current;
+    if (prev && !force) {
+      const dLat = (lat - prev.lat) * 111;
+      const dLon = (lon - prev.lon) * 111 * Math.cos((lat * Math.PI) / 180);
+      if (Math.hypot(dLat, dLon) < 8) return;
+    }
+    lastCoords.current = { lat, lon };
     try {
       setError('');
       const p = await reverseGeocode(lat, lon);
@@ -124,6 +137,36 @@ export default function App() {
     });
   }, [place, granularity, news, jobs, hotels]);
 
+  // resume → scored jobs, best match first
+  const scoredJobs: ScoredJob[] = useMemo(() => {
+    if (!resume) return jobs.map((j) => ({ ...j, matchScore: 0, matchedSkills: [], missingSkills: [] }));
+    return jobs
+      .map((j) => {
+        const { score, matched, missing } = scoreJob(j, resume);
+        return { ...j, matchScore: score, matchedSkills: matched, missingSkills: missing };
+      })
+      .sort((a, b) => b.matchScore - a.matchScore);
+  }, [jobs, resume]);
+
+  const uploadResume = async (file: File) => {
+    setUploading(true);
+    try {
+      const text = await extractTextFromFile(file);
+      const r = parseResumeText(text, file.name);
+      store.setResume(r);
+      setResume(r);
+    } catch {
+      setError('Could not read that resume file.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const clearResume = () => {
+    store.setResume(null);
+    setResume(null);
+  };
+
   useEffect(() => {
     document.title = 'TerraPulse — what\'s happening anywhere on Earth, live';
   }, []);
@@ -184,22 +227,26 @@ export default function App() {
       {/* right: data tabs */}
       <div className="absolute right-4 top-20 bottom-4 z-10 w-[380px] max-w-[calc(100vw-2rem)] hidden sm:block">
         <SidePanel
-          news={news} jobs={jobs} hotels={hotels}
+          news={news} jobs={scoredJobs} hotels={hotels}
           loading={loading} error={error}
           newsTopic={newsTopic} setNewsTopic={setNewsTopic}
           jobQuery={jobQuery} setJobQuery={setJobQuery}
           onSearch={refetchWithFilters}
+          resume={resume} uploading={uploading}
+          onResumeUpload={uploadResume} onResumeClear={clearResume}
         />
       </div>
 
       {/* mobile: bottom sheet tabs */}
       <div className="absolute left-2 right-2 bottom-2 top-[58%] z-10 sm:hidden">
         <SidePanel
-          news={news} jobs={jobs} hotels={hotels}
+          news={news} jobs={scoredJobs} hotels={hotels}
           loading={loading} error={error}
           newsTopic={newsTopic} setNewsTopic={setNewsTopic}
           jobQuery={jobQuery} setJobQuery={setJobQuery}
           onSearch={refetchWithFilters}
+          resume={resume} uploading={uploading}
+          onResumeUpload={uploadResume} onResumeClear={clearResume}
         />
       </div>
 
