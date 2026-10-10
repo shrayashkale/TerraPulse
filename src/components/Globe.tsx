@@ -18,7 +18,7 @@ interface Props {
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
 // draw a map-pin icon on a canvas → data URL for the billboard
-function makePin(C: any, color: string): string {
+function makePin(color: string): string {
   const c = document.createElement('canvas');
   c.width = 68; c.height = 88;
   const x = c.getContext('2d')!;
@@ -116,7 +116,7 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
       pinRef.current = v.entities.add({
         position: C.Cartesian3.fromDegrees(lon, lat, 800),
         billboard: {
-          image: makePin(C, '#f59e0b'),
+          image: makePin('#f59e0b'),
           width: 34, height: 44,
           verticalOrigin: C.VerticalOrigin.BOTTOM,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
