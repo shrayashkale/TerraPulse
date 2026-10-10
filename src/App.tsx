@@ -128,11 +128,16 @@ export default function App() {
     document.title = 'TerraPulse — what\'s happening anywhere on Earth, live';
   }, []);
 
+  // pin the place name on the globe itself
+  const label = place ? placeLabel(place, granularity) : 'Earth';
+  useEffect(() => {
+    if (place) globeRef.current?.setLabel(label, place.lat, place.lon);
+    else globeRef.current?.setLabel(null);
+  }, [label, place]);
+
   if (!keys) {
     return <KeyGate onDone={() => setKeys(store.getKeys())} />;
   }
-
-  const label = place ? placeLabel(place, granularity) : 'Earth';
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-ink-950 text-slate-200">

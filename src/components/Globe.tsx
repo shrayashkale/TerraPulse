@@ -7,6 +7,7 @@ declare global {
 
 export interface GlobeHandle {
   flyTo: (lat: number, lon: number, height?: number) => void;
+  setLabel: (text: string | null, lat?: number, lon?: number) => void;
 }
 
 interface Props {
@@ -18,6 +19,7 @@ const GIBS = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi';
 const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
   const divRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
+  const labelRef = useRef<any>(null);
   const cbRef = useRef(onFocusChange);
   cbRef.current = onFocusChange;
   const [failed, setFailed] = useState(false);
@@ -33,6 +35,43 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
         duration: 2.4,
         easingFunction: C.EasingFunction.CUBIC_IN_OUT,
       });
+    },
+    setLabel(text: string | null, lat?: number, lon?: number) {
+      const C = window.Cesium;
+      const v = viewerRef.current;
+      if (!C || !v) return;
+      let ent = labelRef.current;
+      if (!text || lat === undefined || lon === undefined) {
+        if (ent) { v.entities.remove(ent); labelRef.current = null; }
+        return;
+      }
+      const pos = C.Cartesian3.fromDegrees(lon, lat, 1500);
+      if (!ent) {
+        ent = v.entities.add({
+          position: pos,
+          point: {
+            pixelSize: 9,
+            color: C.Color.fromCssColorString('#22d3ee'),
+            outlineColor: C.Color.WHITE, outlineWidth: 2,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+          },
+          label: {
+            text,
+            font: '700 15px system-ui, sans-serif',
+            fillColor: C.Color.WHITE,
+            outlineColor: C.Color.fromCssColorString('#060b16'),
+            outlineWidth: 4,
+            style: C.LabelStyle.FILL_AND_OUTLINE,
+            pixelOffset: new C.Cartesian2(0, -30),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            scaleByDistance: new C.NearFarScalar(2e5, 1.15, 1.2e7, 0.65),
+          },
+        });
+        labelRef.current = ent;
+      } else {
+        ent.position = pos;
+        ent.label.text = text;
+      }
     },
   }));
 
@@ -70,10 +109,9 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
     viewer.imageryLayers.addImageryProvider(
       gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/jpeg'),
     );
-    // Borders + place labels overlay (transparent) — names appear as you zoom
-    for (const layer of ['Reference_Features', 'Reference_Labels']) {
-      viewer.imageryLayers.addImageryProvider(gibs(layer, 'image/png'));
-    }
+    // NOTE: GIBS Reference_Features/Reference_Labels tiles are blank on the
+    // 3857 endpoint (verified) — place names are rendered as a Cesium entity
+    // label via setLabel() instead. Sharper and always in sync.
 
     // Start: whole earth, slight tilt for drama
     viewer.camera.setView({
