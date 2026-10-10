@@ -55,22 +55,21 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
     viewer.scene.skyAtmosphere.show = true;
     (viewer.scene as any).globe.baseColor = C.Color.fromCssColorString('#060b16');
 
-    // NASA GIBS: VIIRS true-color day imagery (HD, deep zoom, no key)
-    const base = new C.WebMapTileServiceImageryProvider({
-      url: GIBS, layer: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
-      style: 'default', format: 'image/jpeg',
-      tileMatrixSetID: 'EPSG4326_250m', maximumLevel: 9,
-      credit: new C.Credit('NASA GIBS'),
-    });
-    viewer.imageryLayers.addImageryProvider(base);
+    // NASA GIBS: VIIRS true-color day imagery (HD, deep zoom, no key).
+    // Verified against the live GetCapabilities: TileMatrixSet "250m",
+    // matrices 0-8, PNG. (Wrong IDs/formats = blank blue globe.)
+    const gibs = (layer: string, format: string) =>
+      new C.WebMapTileServiceImageryProvider({
+        url: GIBS, layer, style: 'default', format,
+        tileMatrixSetID: '250m', maximumLevel: 8,
+        credit: new C.Credit('NASA GIBS'),
+      });
+    viewer.imageryLayers.addImageryProvider(
+      gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/png'),
+    );
     // Borders + place labels overlay (transparent)
     for (const layer of ['Reference_Features', 'Reference_Labels']) {
-      viewer.imageryLayers.addImageryProvider(
-        new C.WebMapTileServiceImageryProvider({
-          url: GIBS, layer, style: 'default', format: 'image/png',
-          tileMatrixSetID: 'EPSG4326_250m', maximumLevel: 9,
-        }),
-      );
+      viewer.imageryLayers.addImageryProvider(gibs(layer, 'image/png'));
     }
 
     // Start: whole earth, slight tilt for drama
