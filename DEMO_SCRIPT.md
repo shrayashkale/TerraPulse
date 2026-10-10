@@ -19,8 +19,8 @@ focused. Narration optional. Target: **2:30–2:50 total.**
 
 ## Shot 3 — City pulse (0:55–1:25)
 **On screen:** Zoom deeper into Mumbai → news switches to Mumbai headlines, Jobs tab fills, Hotels tab shows live prices.
-**Say/show:** "Deeper — Mumbai. The news goes local, live job listings appear, hotels with real weekend prices."
-**Action:** Search "Mumbai", zoom in. Flip through the three tabs.
+**Say/show:** "Deeper — Mumbai. The news goes local, live job listings appear, hotels with real weekend prices. And when I upload my resume, every job gets ranked by how well it fits *me*."
+**Action:** Search "Mumbai", zoom in. In the Jobs tab, upload the resume — show match % badges appearing. Flip through the three tabs.
 
 ## Shot 4 — Neighbourhood pulse (1:25–1:50)
 **On screen:** Zoom into Andheri → hyperlocal headlines.
