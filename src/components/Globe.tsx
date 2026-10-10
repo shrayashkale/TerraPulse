@@ -112,16 +112,19 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
         credit: new C.Credit('Esri, Maxar, Earthstar Geographics'),
       }),
     );
-    // Seamless ambient labels (cities → streets as you zoom), transparent,
-    // OSM-based — this is what makes it feel like Google Earth.
-    viewer.imageryLayers.addImageryProvider(
-      new C.UrlTemplateImageryProvider({
-        url: 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png',
-        subdomains: ['a', 'b', 'c', 'd'],
-        maximumLevel: 20,
-        credit: new C.Credit('© OpenStreetMap contributors © CARTO'),
-      }),
-    );
+    // Seamless ambient labels, keyless, same provider as the base:
+    // place names + boundaries, and roads/street names at deep zoom.
+    // (CARTO now watermarks without an API key — Esri's own reference
+    // overlays are designed for exactly this satellite base.)
+    for (const ref of ['World_Boundaries_and_Places', 'World_Transportation']) {
+      viewer.imageryLayers.addImageryProvider(
+        new C.UrlTemplateImageryProvider({
+          url: `https://server.arcgisonline.com/ArcGIS/rest/services/Reference/${ref}/MapServer/tile/{z}/{y}/{x}`,
+          maximumLevel: 19,
+          credit: new C.Credit('Esri, HERE, Garmin, OpenStreetMap contributors'),
+        }),
+      );
+    }
 
     // apply any label that arrived before the viewer was ready
     if (pendingLabel.current) applyLabel(C, viewer, labelRef, pendingLabel.current);
