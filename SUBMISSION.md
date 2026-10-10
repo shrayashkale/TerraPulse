@@ -10,9 +10,10 @@ Deadline: **2026-10-10 23:59 IST**
 > the work?*** Zoom into India and get India's breaking news; zoom into Mumbai and the pulse goes local —
 > headlines, hotels with real weekend prices, and **job listings ranked by fit against your own resume**
 > (upload it once in the Jobs tab — PDF/DOCX/TXT parsed in-browser, every listing scored on skills with
-> match % and skill gaps). Zoom into Andheri and the pulse follows you to the neighbourhood. Every zoom
+> match % and skill gaps). Hit **Show on map** on any listing and the globe flies to that company's
+> office — the job market becomes pins on the planet. Zoom into Andheri and the pulse follows you to the neighbourhood. Every zoom
 > level fires **SerpApi's Google News, Google Jobs, and Google Hotels engines** off the exact coordinates
-> in view, and a **Gemini AI briefing** synthesizes the headlines into a three-sentence brief — plus you
+> in view (plus **Google Maps** for the Show-on-map office resolve), and a **Gemini AI briefing** synthesizes the headlines into a three-sentence brief — plus you
 > can ask follow-up questions about any place, answered from live data. Filters slice news by topic and
 > jobs by role.
 >

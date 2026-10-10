@@ -17,22 +17,22 @@ focused. Narration optional. Target: **2:30–2:50 total.**
 **Say/show:** "Zoom into India — live breaking news for the country, and the AI briefs me in three sentences."
 **Action:** Use the search box: type "India", fly in. Linger on the news tab + briefing.
 
-## Shot 3 — City pulse (0:55–1:25)
+## Shot 3 — City pulse (0:55–1:35)
 **On screen:** Zoom deeper into Mumbai → news switches to Mumbai headlines, Jobs tab fills, Hotels tab shows live prices.
-**Say/show:** "Deeper — Mumbai. The news goes local, live job listings appear, hotels with real weekend prices. And when I upload my resume, every job gets ranked by how well it fits *me*."
-**Action:** Search "Mumbai", zoom in. In the Jobs tab, upload the resume — show match % badges appearing. Flip through the three tabs.
+**Say/show:** "Deeper — Mumbai. The news goes local, live job listings appear, hotels with real weekend prices. And when I upload my resume, every job gets ranked by how well it fits *me* — then 'Show on map' flies me straight to that company's office. The job market, as pins on the planet."
+**Action:** Search "Mumbai", zoom in. In the Jobs tab, upload the resume — show match % badges appearing. Click **Show on map** on one listing — let the globe fly to the amber pin. Flip through the three tabs.
 
-## Shot 4 — Neighbourhood pulse (1:25–1:50)
+## Shot 4 — Neighbourhood pulse (1:35–2:00)
 **On screen:** Zoom into Andheri → hyperlocal headlines.
 **Say/show:** "Deeper still — Andheri. The pulse follows you all the way down."
 **Action:** Zoom/pan to Andheri, show the news tab updating.
 
-## Shot 5 — Filters + AI questions (1:50–2:15)
+## Shot 5 — Filters + AI questions (2:00–2:25)
 **On screen:** Type a news filter ("cricket"), a job filter ("designer"), then ask the AI a question.
 **Say/show:** "Filter the news, filter the roles — and ask the AI anything about the place, answered from live data."
 **Action:** Type filters, hit Go. Ask: "Is Mumbai hiring designers right now?"
 
-## Shot 6 — Anywhere on Earth (2:15–2:45)
+## Shot 6 — Anywhere on Earth (2:25–2:55)
 **On screen:** Fly to somewhere far — Tokyo or Berlin.
 **Say/show:** "And it's the whole planet. Anywhere you zoom, TerraPulse knows what's happening there. Live."
 **Action:** Search "Tokyo", let it fly, show the fresh news + briefing. End card.
