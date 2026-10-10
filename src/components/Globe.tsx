@@ -13,7 +13,7 @@ interface Props {
   onFocusChange: (lat: number, lon: number, height: number) => void;
 }
 
-const GIBS = 'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi';
+const GIBS = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi';
 
 const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -55,19 +55,22 @@ const Globe = forwardRef<GlobeHandle, Props>(({ onFocusChange }, ref) => {
     viewer.scene.skyAtmosphere.show = true;
     (viewer.scene as any).globe.baseColor = C.Color.fromCssColorString('#060b16');
 
-    // NASA GIBS: VIIRS true-color day imagery (HD, deep zoom, no key).
-    // Verified vs live GetCapabilities + real tile downloads:
-    // base = 250m set, matrices 0-8, JPEG; overlays = 250m, PNG.
+    // NASA GIBS via Web-Mercator (GoogleMapsCompatible grid), which matches
+    // Cesium's WebMercatorTilingScheme exactly. (The 4326 "250m" set has a
+    // non-doubling grid Cesium can't align — that was the dark band.)
+    // Verified vs live GetCapabilities + real tile downloads.
+    const scheme = new C.WebMercatorTilingScheme();
     const gibs = (layer: string, format: string) =>
       new C.WebMapTileServiceImageryProvider({
         url: GIBS, layer, style: 'default', format,
-        tileMatrixSetID: '250m', maximumLevel: 8,
+        tileMatrixSetID: 'GoogleMapsCompatible_Level9', maximumLevel: 9,
+        tilingScheme: scheme,
         credit: new C.Credit('NASA GIBS'),
       });
     viewer.imageryLayers.addImageryProvider(
       gibs('VIIRS_SNPP_CorrectedReflectance_TrueColor', 'image/jpeg'),
     );
-    // Borders + place labels overlay (transparent)
+    // Borders + place labels overlay (transparent) — names appear as you zoom
     for (const layer of ['Reference_Features', 'Reference_Labels']) {
       viewer.imageryLayers.addImageryProvider(gibs(layer, 'image/png'));
     }
