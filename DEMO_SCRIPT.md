@@ -8,7 +8,7 @@ focused. Narration optional. Target: **2:30–2:50 total.**
 ---
 
 ## Shot 1 — The globe (0:00–0:25)
-**On screen:** Key gate → the 3D Earth spinning, NASA satellite imagery.
+**On screen:** Key gate → the 3D Earth spinning, HD satellite imagery with place labels.
 **Say/show:** "TerraPulse is a live pulse of planet Earth. Zoom anywhere — it tells you what's happening there, right now."
 **Action:** Paste keys, land on the globe. Slowly rotate it once.
 
