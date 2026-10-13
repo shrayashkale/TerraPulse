@@ -72,9 +72,6 @@ Keys (both free):
 5. Your resume (parsed in-browser, never uploaded anywhere) scores every job listing.
 6. Gemini synthesizes the headlines into a 3-sentence briefing and answers your questions.
 
-## Demo video script
-
-See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) — under 3 minutes. Submission notes in [SUBMISSION.md](SUBMISSION.md).
 
 ## Credits
 
